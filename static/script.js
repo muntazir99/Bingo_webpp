@@ -1,157 +1,103 @@
-// const grid = document.getElementById("grid");
-// const buttons = grid.getElementsByClassName("button");
-// const numbers = [];
-// let score = 0;
-
-// while (numbers.length < 25) {
-//   const num = Math.floor(Math.random() * 25) + 1;
-//   if (!numbers.includes(num)) {
-//     numbers.push(num);
-//   }
-// }
-
-// for (let i = 0; i < buttons.length; i++) {
-//   buttons[i].textContent = numbers[i];
-//   buttons[i].addEventListener("click", function() {
-//     this.style.backgroundColor = "red";
-//     checkForWin();
-//   });
-// }
-
-// function checkForWin() {
-//   // Check rows
-//   for (let i = 0; i < 5; i++) {
-//     let count = 0;
-//     for (let j = 0; j < 5; j++) {
-//       if (grid.rows[i].cells[j].style.backgroundColor === "red") {
-//         count++;
-//       }
-//     }
-//     if (count === 5) {
-//       score++;
-//       console.log("Score: " + score);
-//       updateScore();
-//       return;
-//     }
-//   }
-
-//   // Check columns
-//   for (let i = 0; i < 5; i++) {
-//     let count = 0;
-//     for (let j = 0; j < 5; j++) {
-//       if (grid.rows[j].cells[i].style.backgroundColor === "red") {
-//         count++;
-//       }
-//     }
-//     if (count === 5) {
-//       score++;
-//       console.log("Score: " + score);
-//       updateScore();
-//       return;
-//     }
-//   }
-
-//   // Check diagonals
-//   let count1 = 0;
-//   for (let i = 0; i < 5; i++) {
-//     if (grid.rows[i].cells[i].style.backgroundColor === "red") {
-//       count1++;
-//     }
-//   }
-//   if (count1 === 5) {
-//     score++;
-//     console.log("Score: " + score);
-//     updateScore();
-//     return;
-//   }
-
-//   let count2 = 0;
-//   for (let i = 0; i < 5; i++) {
-//     if (grid.rows[i].cells[4 - i].style.backgroundColor === "red") {
-//       count2++;
-//     }
-//   }
-//   if (count2 === 5) {
-//     score++;
-//     console.log("Score: " + score);
-//     updateScore();
-//     return;
-//   }
-// }
-
-// function updateScore() {
-//   const scoreDisplay = document.getElementById("score");
-//   scoreDisplay.textContent = "Score: " + score;
-// }
-
-
-const grid = document.getElementById("grid");
-const buttons = grid.getElementsByClassName("button");
-const numbers = [];
-let score = 0; // Initialize score variable
-
-while (numbers.length < 25) {
-  const num = Math.floor(Math.random() * 25) + 1;
-  if (!numbers.includes(num)) {
-    numbers.push(num);
-  }
-}
-
-for (let i = 0; i < buttons.length; i++) {
-  buttons[i].textContent = numbers[i];
-  buttons[i].addEventListener("click", function() {
-    // Change background color to red
-    this.style.backgroundColor = "red";
-    checkForWin(); // Check for win after clicking
-  });
-}
-
-function checkForWin() {
-  // Check rows, columns, and diagonals
-  let count1 = 0;
-  let count2 = 0;
-
-  for (let i = 0; i < 5; i++) {
-    let countRow = 0;
-    let countCol = 0;
-
-    for (let j = 0; j < 5; j++) {
-      // Check rows
-      if (grid.rows[i].cells[j].style.backgroundColor === "red") {
-        countRow++;
-      }
-      // Check columns
-      if (grid.rows[j].cells[i].style.backgroundColor === "red") {
-        countCol++;
-      }
-    }
-
-    // Check diagonals
-    if (grid.rows[i].cells[i].style.backgroundColor === "red") {
-      count1++;
-    }
-    if (grid.rows[i].cells[4 - i].style.backgroundColor === "red") {
-      count2++;
-    }
-
-    // Update score if any row or column is completely red
-    if (countRow === 5) {
-      score++;
-    }
-    if (countCol === 5) {
-      score++;
-    }
-  }
-
-  // Update score if any diagonal is completely red
-  if (count1 === 5 || count2 === 5) {
-    score++;
-  }
-
-  updateScore(); // Update score display
-}
-
-function updateScore() {
+document.addEventListener("DOMContentLoaded", function () {
+  const startButton = document.getElementById("start-btn");
+  const board = document.getElementById("board");
   const scoreDisplay = document.getElementById("score");
-  scoreDisplay.textContent = "Score: " + score;
-}
+  let score = 0;
+  let rowWins = 0;
+  let colWins = 0;
+  let diagWins = 0;
+
+  startButton.addEventListener("click", startGame);
+
+  function startGame() {
+    generateBoard();
+    score = 0;
+    updateScoreDisplay();
+  }
+
+  function generateBoard() {
+    board.innerHTML = "";
+
+    for (let i = 0; i < 5; i++) {
+      let row = board.insertRow();
+      for (let j = 0; j < 5; j++) {
+        let cell = row.insertCell();
+        let randomNumber = getRandomNumber();
+        cell.textContent = randomNumber;
+        cell.addEventListener("click", () => selectCell(cell));
+      }
+    }
+  }
+
+  function getRandomNumber() {
+    return Math.floor(Math.random() * 15) + 1;
+  }
+
+  function selectCell(cell) {
+    cell.classList.toggle("selected");
+    checkForWin();
+  }
+
+  function checkForWin() {
+    let rows = board.getElementsByTagName("tr");
+    let cols = board.getElementsByTagName("td");
+
+    for (let row of rows) {
+      let rowRedCount = 0;
+      for (let cell of row.cells) {
+        if (cell.classList.contains("selected")) {
+          rowRedCount++;
+        }
+      }
+      if (rowRedCount === 5 && rowWins === 0) {
+        rowWins = 1;
+        increaseScore();
+      }
+    }
+
+    for (let i = 0; i < 5; i++) {
+      let colRedCount = 0;
+      for (let j = 0; j < 5; j++) {
+        if (cols[j * 5 + i].classList.contains("selected")) {
+          colRedCount++;
+        }
+      }
+      if (colRedCount === 5 && colWins === 0) {
+        colWins = 1;
+        increaseScore();
+      }
+    }
+
+    if (
+      cols[0].classList.contains("selected") &&
+      cols[6].classList.contains("selected") &&
+      cols[12].classList.contains("selected") &&
+      cols[18].classList.contains("selected") &&
+      cols[24].classList.contains("selected") &&
+      diagWins === 0
+    ) {
+      diagWins = 1;
+      increaseScore();
+    }
+    if (
+      cols[4].classList.contains("selected") &&
+      cols[8].classList.contains("selected") &&
+      cols[12].classList.contains("selected") &&
+      cols[16].classList.contains("selected") &&
+      cols[20].classList.contains("selected") &&
+      diagWins === 0
+    ) {
+      diagWins = 1;
+      increaseScore();
+    }
+  }
+
+  function increaseScore() {
+    score++;
+    updateScoreDisplay();
+  }
+
+  function updateScoreDisplay() {
+    scoreDisplay.textContent = "Score: " + score;
+  }
+});
